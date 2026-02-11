@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Проверка Supabase</h1>
+    
+    <div>
+        <button onclick="testConnection()">Проверить подключение</button>
+        <button onclick="listTables()">Показать таблицы</button>
+        <button onclick="showColumnTypes()">Типы данных</button>
+    </div>
+    
+    <div id="results" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+    <script>
+        // Ваши данные Supabase
+        const supabaseUrl = 'https://hocudyimgknwaitlsagk.supabase.co';
+        const supabaseKey = 'sb_publishable_vpdM56mSm1zukhIXNCPQkg_6vM9qxMH';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function testConnection() {
+            document.getElementById('results').innerHTML = 'Проверяем подключение...';
+            
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                
+                if (error) throw error;
+                
+                document.getElementById('results').innerHTML = 
+                    `<div style="color: green;">✅ Подключение успешно!</div>
+                     <p>Проект: Home-Pharmacy-Catalog</p>
+                     <p>URL: ${supabaseUrl}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<div style="color: red;">❌ Ошибка: ${error.message}</div>`;
+            }
+        }
+
+        async function listTables() {
+            document.getElementById('results').innerHTML = 'Загружаем таблицы...';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('pg_tables')
+                    .select('tablename')
+                    .eq('schemaname', 'public');
+                
+                if (error) throw error;
+                
+                if (data.length === 0) {
+                    document.getElementById('results').innerHTML = 'Таблиц не найдено';
+                    return;
+                }
+                
+                let html = '<h3>Таблицы:</h3><ul>';
+                data.forEach(table => {
+                    html += `<li>${table.tablename}</li>`;
+                });
+                html += '</ul>';
+                
+                document.getElementById('results').innerHTML = html;
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<div style="color: red;">Ошибка: ${error.message}</div>`;
+            }
+        }
+
+        function showColumnTypes() {
+            const types = `
+                <h3>Типы данных в Supabase:</h3>
+                <ul>
+                    <li><strong>int8</strong> - большое целое</li>
+                    <li><strong>int4</strong> - обычное целое</li>
+                    <li><strong>text</strong> - текст без ограничений</li>
+                    <li><strong>varchar</strong> - текст с ограничением</li>
+                    <li><strong>bool</strong> - true/false</li>
+                    <li><strong>timestamp</strong> - дата и время</li>
+                    <li><strong>uuid</strong> - уникальный ID</li>
+                    <li><strong>jsonb</strong> - JSON данные</li>
+                    <li><strong>numeric</strong> - десятичные числа</li>
+                </ul>
+                <p>Пример таблицы для аптеки:</p>
+                <pre>
+medicines (
+    id UUID PRIMARY KEY,
+    name TEXT,
+    category VARCHAR(100),
+    quantity INTEGER,
+    price NUMERIC(10,2),
+    expiry_date DATE,
+    requires_prescription BOOLEAN
+)</pre>
+            `;
+            
+            document.getElementById('results').innerHTML = types;
+        }
+    </script>
+</body>
+</html>
