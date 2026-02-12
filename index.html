@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Домашняя аптека — Дипломный проект</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+      color: #1a2e3f;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 30px;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+    }
+    h1 {
+      grid-column: 1 / -1;
+      color: #0b3b5c;
+      border-bottom: 3px solid #4fc3f7;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      font-size: 2.2em;
+    }
+    h2 {
+      color: #2c5f7b;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-section, .list-section {
+      background: #f9fcff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,79,112,0.08);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border: 2px solid #e1eef6;
+      border-radius: 12px;
+      font-size: 1em;
+      transition: 0.2s;
+      background: white;
+    }
+    input:focus, textarea:focus {
+      border-color: #4fc3f7;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79,195,247,0.2);
+    }
+    button {
+      background: #0b3b5c;
+      color: white;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover {
+      background: #0f4e73;
+      transform: scale(1.02);
+      box-shadow: 0 6px 14px rgba(11,59,92,0.25);
+    }
+    .delete-btn {
+      background: #d32f2f;
+      padding: 8px 16px;
+      font-size: 0.9em;
+      width: auto;
+    }
+    .delete-btn:hover { background: #b71c1c; }
+    .edit-btn {
+      background: #ff9800;
+      padding: 8px 16px;
+      font-size: 0.9em;
+      width: auto;
+    }
+    .edit-btn:hover { background: #f57c00; }
+    .medicine-card {
+      background: white;
+      border-left: 6px solid #4fc3f7;
+      padding: 18px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.2s;
+    }
+    .medicine-card:hover {
+      box-shadow: 0 8px 18px rgba(0,79,112,0.12);
+    }
+    .medicine-info h3 {
+      color: #0b3b5c;
+      margin-bottom: 6px;
+    }
+    .medicine-info p {
+      color: #4a6a7c;
+      margin-bottom: 4px;
+    }
+    .price {
+      font-weight: 700;
+      color: #1e6b3b;
+      font-size: 1.2em;
+    }
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .user-info {
+      grid-column: 1 / -1;
+      background: #e3f2fd;
+      padding: 16px 24px;
+      border-radius: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .auth-btn {
+      background: #2e7d32;
+      padding: 10px 24px;
+      width: auto;
+    }
+    .logout-btn {
+      background: #6c757d;
+    }
+    .message {
+      grid-column: 1 / -1;
+      padding: 16px 24px;
+      border-radius: 40px;
+      display: none;
+      font-weight: 500;
+      text-align: center;
+      animation: slideIn 0.3s;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .success { background: #c8e6c9; color: #1e3b2c; display: block; }
+    .error { background: #ffcdd2; color: #8b1e1e; display: block; }
+    .stats {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 20px;
+      justify-content: space-around;
+      margin-top: 20px;
+      padding: 20px;
+      background: #e8f0fe;
+      border-radius: 16px;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2em;
+      font-weight: 700;
+      color: #0b3b5c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏥 Домашняя аптека — Дипломный проект</h1>
+    
+    <!-- Блок авторизации -->
+    <div class="user-info">
+      <span id="userStatus">🔒 Не авторизован</span>
+      <button id="authButton" class="auth-btn">🔑 Войти через GitHub</button>
+    </div>
+
+    <!-- Форма добавления/редактирования -->
+    <div class="form-section">
+      <h2>✏️ <span id="formTitle">Добавить лекарство</span></h2>
+      <form id="medicineForm">
+        <input type="hidden" id="editId">
+        <input type="text" id="name" placeholder="Название препарата" required>
+        <textarea id="description" placeholder="Описание, показания, дозировка" rows="3"></textarea>
+        <input type="number" id="price" placeholder="Цена (₽)" step="0.01">
+        <input type="text" id="manufacturer" placeholder="Производитель">
+        <input type="date" id="expiryDate">
+        <button type="submit" id="submitBtn">
+          <span>➕</span> Сохранить
+        </button>
+        <button type="button" id="cancelEditBtn" style="background: #6c757d; display: none;">✖ Отмена</button>
+      </form>
+    </div>
+
+    <!-- Список лекарств -->
+    <div class="list-section">
+      <h2>📋 Моя аптека</h2>
+      <div id="medicineList">
+        <!-- Список загружается динамически -->
+        <p style="color: #6c757d; text-align: center;">Загрузка...</p>
+      </div>
+    </div>
+
+    <!-- Сообщения для пользователя -->
+    <div id="message" class="message"></div>
+
+    <!-- Статистика -->
+    <div class="stats" id="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="totalCount">0</div>
+        <div>Всего препаратов</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="avgPrice">0</div>
+        <div>Средняя цена (₽)</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ========== КОНФИГУРАЦИЯ ==========
+    const SUPABASE_URL = 'https://hocudyimgknwaitlsagk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_vpdM56mSm1zukhIXNCPQkg_6vM9qxMH';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+    let currentUser = null;
+    let editingId = null;
+
+    // ========== ЭЛЕМЕНТЫ DOM ==========
+    const form = document.getElementById('medicineForm');
+    const medicineList = document.getElementById('medicineList');
+    const messageDiv = document.getElementById('message');
+    const authButton = document.getElementById('authButton');
+    const userStatus = document.getElementById('userStatus');
+    const formTitle = document.getElementById('formTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const editIdInput = document.getElementById('editId');
+
+    // ========== ПРОВЕРКА АВТОРИЗАЦИИ ==========
+    async function checkUser() {
+      const { data: { user } } = await _supabase.auth.getUser();
+      currentUser = user;
+      
+      if (user) {
+        userStatus.innerHTML = `✅ Авторизован: ${user.user_metadata?.user_name || user.email || 'GitHub пользователь'}`;
+        authButton.textContent = '🚪 Выйти';
+        authButton.classList.add('logout-btn');
+        loadMedicines();
+      } else {
+        userStatus.innerHTML = '🔒 Не авторизован (работает анонимный режим)';
+        authButton.textContent = '🔑 Войти через GitHub';
+        authButton.classList.remove('logout-btn');
+        loadMedicines(); // Всё равно загружаем (RLS отключён)
+      }
+    }
+
+    // ========== АВТОРИЗАЦИЯ ==========
+    async function handleAuth() {
+      if (currentUser) {
+        await _supabase.auth.signOut();
+        currentUser = null;
+        checkUser();
+        showMessage('Вы вышли из системы', 'success');
+      } else {
+        const { error } = await _supabase.auth.signInWithOAuth({
+          provider: 'github',
+          options: {
+            redirectTo: window.location.origin + '/Home-Pharmacy-Catalog/'
+          }
+        });
+        if (error) showMessage('Ошибка входа: ' + error.message, 'error');
+      }
+    }
+
+    // ========== ЗАГРУЗКА ЛЕКАРСТВ ==========
+    async function loadMedicines() {
+      try {
+        const { data, error } = await _supabase
+          .from('medicines')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        displayMedicines(data || []);
+        updateStats(data || []);
+      } catch (error) {
+        showMessage('Ошибка загрузки: ' + error.message, 'error');
+        medicineList.innerHTML = '<p style="color: #d32f2f;">❌ Не удалось загрузить данные</p>';
+      }
+    }
+
+    // ========== ОТОБРАЖЕНИЕ ЛЕКАРСТВ ==========
+    function displayMedicines(medicines) {
+      if (medicines.length === 0) {
+        medicineList.innerHTML = '<p style="color: #6c757d; text-align: center;">📭 Аптека пуста. Добавьте первый препарат!</p>';
+        return;
+      }
+
+      let html = '';
+      medicines.forEach(med => {
+        html += `
+          <div class="medicine-card">
+            <div class="medicine-info">
+              <h3>${escapeHtml(med.name)}</h3>
+              <p>${escapeHtml(med.description || 'Нет описания')}</p>
+              <p>🏭 ${escapeHtml(med.manufacturer || 'Не указан')}</p>
+              <p>📅 Годен до: ${med.expiry_date ? escapeHtml(med.expiry_date) : 'Не указано'}</p>
+              <p class="price">💰 ${med.price ? Number(med.price).toFixed(2) + ' ₽' : 'Цена не указана'}</p>
+              <p style="font-size: 0.85em; color: #8a9aa5;">🆔 ID: ${med.id}</p>
+            </div>
+            <div class="card-actions">
+              <button class="edit-btn" onclick="editMedicine('${med.id}')">✏️ Редакт.</button>
+              <button class="delete-btn" onclick="deleteMedicine('${med.id}')">🗑️ Удалить</button>
+            </div>
+          </div>
+        `;
+      });
+      medicineList.innerHTML = html;
+    }
+
+    // ========== ЭСКЕЙПИНГ HTML ==========
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ========== ДОБАВЛЕНИЕ / ОБНОВЛЕНИЕ ==========
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const description = document.getElementById('description').value;
+      const price = document.getElementById('price').value;
+      const manufacturer = document.getElementById('manufacturer').value;
+      const expiryDate = document.getElementById('expiryDate').value;
+      const editId = document.getElementById('editId').value;
+
+      const medicineData = {
+        name,
+        description: description || null,
+        price: price ? parseFloat(price) : null,
+        manufacturer: manufacturer || null,
+        expiry_date: expiryDate || null
+      };
+
+      try {
+        let result;
+        if (editId) {
+          // ОБНОВЛЕНИЕ
+          result = await _supabase
+            .from('medicines')
+            .update(medicineData)
+            .eq('id', editId);
+          showMessage('✅ Лекарство обновлено!', 'success');
+        } else {
+          // ДОБАВЛЕНИЕ
+          result = await _supabase
+            .from('medicines')
+            .insert([medicineData]);
+          showMessage('✅ Лекарство добавлено!', 'success');
+        }
+
+        if (result.error) throw result.error;
+
+        form.reset();
+        document.getElementById('editId').value = '';
+        editingId = null;
+        formTitle.textContent = 'Добавить лекарство';
+        submitBtn.innerHTML = '<span>➕</span> Сохранить';
+        cancelEditBtn.style.display = 'none';
+        loadMedicines();
+      } catch (error) {
+        showMessage('Ошибка: ' + error.message, 'error');
+      }
+    });
+
+    // ========== РЕДАКТИРОВАНИЕ ==========
+    window.editMedicine = async function(id) {
+      try {
+        const { data, error } = await _supabase
+          .from('medicines')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        document.getElementById('editId').value = data.id;
+        document.getElementById('name').value = data.name || '';
+        document.getElementById('description').value = data.description || '';
+        document.getElementById('price').value = data.price || '';
+        document.getElementById('manufacturer').value = data.manufacturer || '';
+        document.getElementById('expiryDate').value = data.expiry_date || '';
+        
+        formTitle.textContent = '✏️ Редактировать лекарство';
+        submitBtn.innerHTML = '<span>💾</span> Обновить';
+        cancelEditBtn.style.display = 'block';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        showMessage('Ошибка загрузки данных: ' + error.message, 'error');
+      }
+    };
+
+    // ========== ОТМЕНА РЕДАКТИРОВАНИЯ ==========
+    cancelEditBtn.addEventListener('click', () => {
+      form.reset();
+      document.getElementById('editId').value = '';
+      formTitle.textContent = 'Добавить лекарство';
+      submitBtn.innerHTML = '<span>➕</span> Сохранить';
+      cancelEditBtn.style.display = 'none';
+      showMessage('Редактирование отменено', 'success');
+    });
+
+    // ========== УДАЛЕНИЕ ==========
+    window.deleteMedicine = async function(id) {
+      if (!confirm('Вы уверены, что хотите удалить этот препарат?')) return;
+
+      try {
+        const { error } = await _supabase
+          .from('medicines')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+
+        showMessage('🗑️ Лекарство удалено', 'success');
+        loadMedicines();
+      } catch (error) {
+        showMessage('Ошибка удаления: ' + error.message, 'error');
+      }
+    };
+
+    // ========== СТАТИСТИКА ==========
+    function updateStats(medicines) {
+      const total = medicines.length;
+      document.getElementById('totalCount').textContent = total;
+
+      const prices = medicines.filter(m => m.price).map(m => Number(m.price));
+      const avg = prices.length 
+        ? (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2)
+        : 0;
+      document.getElementById('avgPrice').textContent = avg;
+    }
+
+    // ========== СООБЩЕНИЯ ==========
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = 'message ' + type;
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    authButton.addEventListener('click', handleAuth);
+    checkUser();
+
+    // Слушаем изменения авторизации
+    _supabase.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user || null;
+      checkUser();
+    });
+  </script>
+</body>
+</html>
